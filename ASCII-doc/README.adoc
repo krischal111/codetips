@@ -1,0 +1,30 @@
+= Heading
+:toc:
+:url-github: https:/github.com/krischal111
+
+A paragraph with *bold* and _italic_ text.
+A link to https://google.com[Google].
+A reusable link to {url-github}[GitHub].
+
+image::https://deep-image.ai/_next/static/media/app-info-generator.bf08e63e.webp[An image, 900]
+
+== Section title
+
+* Unordered list item
+** Add another marker to make a nested item.
+* Another unordered list item
+
+NOTE: One of five built-in admonition block types.
+
+=== Subsection title
+
+Text indented by one space is preformatted.
+
+A source block with a Ruby function named `hello` that prints "`Hello, World!`":
+
+[,ruby]
+----
+def hello name = 'World'
+  puts "Hello, #{name}!"
+end
+----
