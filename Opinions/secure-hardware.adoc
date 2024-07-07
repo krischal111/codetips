@@ -1,0 +1,30 @@
+= Secure Hardware
+:toc:
+
+* *Who wants a secure system?*
+** An user
+** A software developer
+** A hardware manufacturer
+** A device assembler
+** Hacker
+
+* *And who can make the system secure?*
+
+Let's delve in the options.
+
+An user of course wants a secure system. But he can only go as far as giving specific permission when he is asked for.
+
+A software wants their software to be secure, only when it is in their interest to create a secure software. There are many opportunities where the software engineer is willing to install backdoors, instead of securing it. There are also instances, where software engineers do not care about the safety, ignoring the concern as the software could be limited in scope. However, in future, if the functionality of the software grows and attack surface increases the previously locked and therefore protected software might become vulnurable later.
+One of the thing in the merit of software developer is, if they fail to make the software secure, they can always dispatch a new patch, securing the previously unsafe software. This flexibility allows software to improve on the security front.
+
+It should be absolutely in the best interest of a hardware manufacturer to create a secure system, if they are not intending to introduce specific backdoors, or make system insecure for some reason. If a hardware system is deemed insecure, there aren't a lot of options like software to secure it later. So, hardware should be secure from the start.
+
+A device assembler should make sure the components they use are good in security. Their choice of secure hardware drives the hardware manufacturers to create a more secure system.
+
+Hacker, most often doesn't want your system to be secure if they want your system hacked. On the other hand, if they want their own system to prevent from being hacked, they would want a secure system. Similarly, a hacker might vouch for a more secure system because he knows the vulnurabilities and simply wants the secure system for all.
+
+An user can make the system secure for him by choosing the more secure system for him.
+A device assembler can make the system secure by choosing the secure components.
+A hardware manufacturer can make the system secure by being careful while designing the system, and also avoiding the conflict of interest.
+A software developer can make the system secure by employing the safety practices, and also avoiding the conflicts of interest.
+A good hacker can make the system secure by reporting the attack vector to the party.
