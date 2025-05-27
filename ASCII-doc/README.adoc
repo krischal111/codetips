@@ -1,27 +1,27 @@
-= Heading
+= Document Title
 :toc:
-:url-github: https:/github.com/krischal111
-
+:url-gitlab: https://gitlab.eclipse.org
+ 
 A paragraph with *bold* and _italic_ text.
-A link to https://google.com[Google].
-A reusable link to {url-github}[GitHub].
-
-image::https://deep-image.ai/_next/static/media/app-info-generator.bf08e63e.webp[An image, 900]
-
+A link to https://eclipse.org[Eclipse].
+A reusable link to {url-gitlab}[GitLab].
+ 
+image::an-image.png[An image,800]
+ 
 == Section title
-
+ 
 * Unordered list item
-** Add another marker to make a nested item.
+** Add another marker to make a nested item
 * Another unordered list item
-
+ 
 NOTE: One of five built-in admonition block types.
-
+ 
 === Subsection title
-
-Text indented by one space is preformatted.
-
+ 
+ Text indented by one space is preformatted.
+ 
 A source block with a Ruby function named `hello` that prints "`Hello, World!`":
-
+ 
 [,ruby]
 ----
 def hello name = 'World'

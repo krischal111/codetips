@@ -1,0 +1,84 @@
+= Interesting facts about C
+:toc:
+ 
+== Facts 1
+
+=== Void is non instantiable in C
+
+Let's see the following code:
+[void.c,c]
+----
+#include <stdio.h>
+
+int main() {
+  void a;
+  printf("%d", a);
+  return 1;
+}
+----
+
+What output do you expect from the following code?
+
+When you try to compile with `clang void.c` you'll get the following error:
+[listing]
+----
+void.c:4:8: error: variable has incomplete type 'void'
+    4 |   void a;
+      |        ^
+1 error generated.
+----
+
+This is because a void type has no value. Let's recall something about types. Let's say, we have 4 bits to work with. How many distinct values we could represent?
+
+Starting from 0000 (=0) to 1111 (=15) we have 16 distinct values. We can also get the same number by 2^4 = 16.
+
+Instead if we had n bits we could have 2^n distinct values. If we require to store k distinct values, it would be sufficient for us to use b = log2(k) bits, so that k = 2^b.
+
+Instead if we have zero possible values we would require log2(0) number of bits, and log2(0) is undefined, and it cannot be instantiated in any way.
+
+Now coming back to the point, since a void type in c has no possible value, thus it cannot be instantiated.
+
+==== Then why some functions in C have return type as void? 
+
+`void` represents an uninstantiable value, so the function cannot return anything, thus it's return value cannot be assigned to anything.
+
+In an ideal world, returning from such a function should be impossible. However it's a quirk of a language that it allows it.
+
+==== How this issue are addressed in other languages?
+
+===== zig
+In a similar langage called zig, instantiation of `void` is allowed. However, this `void` is a unit type, having only one possible value, the `void` itself. Since we have only one distinct type, number of bits required to represent it b = log2(1) = 0 bits. This makes sense because we always know it's the same value, so no bits are required for us to distinguish between different values.
+
+Functions can return `void` and it can be assigned. However, since we are working with 0 bits, the resulting instruction is empty.
+
+Consider the following program:
+[void.zig, zig]
+----
+const std = @import("std");
+
+pub fn main() void {
+    const voidvalue: void = undefined;
+    std.debug.print("Value: {}\n", .{voidvalue});
+    std.debug.print("Size: {} bits\n", .{@bitSizeOf(@TypeOf(voidvalue))});
+}
+----
+
+The output looks something like:
+[listing]
+----
+Value: void
+Size: 0 bits
+----
+
+Zig also offers a family of types called `opaque`, whose value are unknowable and cannot be instantiated.
+
+==== rust
+In another systems language called `rust`, there is unit type `()` which is the default return type of the function, which is equivalent to void type in zig.
+
+Rust also contains another type called `never` represented by `!`. The usage of this type is exactly as it says, it's value are never expressed. It cannot, will not and should not exist.
+
+One of the function that returns a never value is the function `exit()`. If you write like:
+`let x = exit(32);` the function `exit()` never returns a value for `x` to be assigned. 
+
+Likewise, infinite loops, an if expression with early return, all return a never type to it's assignee.
+
