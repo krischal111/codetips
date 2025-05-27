@@ -1,3 +1,3 @@
 = codetips
 
-* link:Interesting-facts-about-C/README.adoc[Interesting facts about C]
+* link:Interesting-facts-about-C[Interesting facts about C]
