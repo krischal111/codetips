@@ -1,8 +1,7 @@
 = Interesting facts about C
 :toc:
  
-== Facts 1
-
+== Fact 1
 === Void is non instantiable in C
 
 Let's see the following code:
@@ -81,4 +80,146 @@ One of the function that returns a never value is the function `exit()`. If you 
 `let x = exit(32);` the function `exit()` never returns a value for `x` to be assigned. 
 
 Likewise, infinite loops, an if expression with early return, all return a never type to it's assignee.
+
+== Fact 2
+=== Zero-bit type in C
+
+You can instantiate a zero bit type in C as:
+
+[zero-bit-type.c, c]
+----
+#include <stdio.h>
+
+int main() {
+    struct zero_bit_type {};
+    struct zero_bit_type zbt;
+    printf("Size of zero_bit_type: %zu bytes\n", sizeof(zbt));
+}
+----
+
+Since the struct has no field, we don't have to assign any value while instantiating it. Believe it or not, this is the unit type in C because it has only one possible value.
+
+If it feels hard to wrap around whether it has only one possible values or zero possible values, consider following demonstration.
+
+How many values are possible for given struct:
+----
+struct char_wrapper {
+  char c;
+};
+----
+You are right, there are exactly 256 different possible values.
+
+Now for the following struct?
+----
+struct two_chars {
+  char a;
+  char b;
+};
+----
+We can see for each value of a, we have 256 different values of b. Thus all possible values of the struct two_chars is 256 * 256.
+
+Now If we remove each field one by one we get:
+----
+struct zero_chars {
+};
+----
+
+Naturally, by dividing the number of unique values for each types each time we remove it from the struct, by the time we get empty struct, we get number of possible values = 1.
+
+Likewise:
+What if we add empty struct field?
+----
+struct strange_char_wrapper{
+  char c;
+  struct {} nothing;
+}
+----
+The number of possible values are still 256. This is only true when `struct {}` has only 1 possible value so that 256 * 1 = 256.
+
+== Fact 3
+=== Unorthodox way to access a value through a pointer.
+
+  `pointer[index]` is same as `index[pointer]`
+
+We can index a pointer `ptr` of type `T` with `idx` using the syntax `ptr[idx]`. 
+
+This is a syntactic sugar for the pointer arithmetic: `*(ptr + i)` 
+
+Since addition is commutative, we can also do: `*(i + ptr)`
+
+Thus equivalently we can index as `idx[ptr]`. We can always interchange position of idx or ptr while using this notation, as long as one of them is pointer.
+
+This is because `(ptr + i)` in pointer arithmetic actually resolves to `(ptr + i * offset)` in machine code, where `offset = sizeof(T)`. We can only know the offset if one of them is the pointer.
+
+Thus instead of `*ptr` you can also `0[ptr]`.
+
+== Fact 4
+=== Assignment Expression in C.
+
+Look at the following code snippet:
+[assignment-expression.c, c]
+----
+#include<stdio.h>
+
+int main() {
+  int a;
+  int b;
+  int c = (a = 2) * (b = 3) + 5;
+
+  // Following not valid in c, only valid in c++.
+  // (b = 5) = 7;
+  printf("Value (a) = %d\n", a);
+  printf("Value (b) = %d\n", b);
+  printf("Value (c) = %d\n", c);
+
+  return 0;
+}
+----
+
+What is the output do you expect from the above program?
+
+When we actually run it, this is the output we get:
+----
+Value (a) = 2
+Value (b) = 3
+Value (c) = 11
+----
+
+Assignment operator (=), like any other operator returns a value, in this case the value that's being assigned is the return value.
+
+==== C/C++ difference
+The above program works both in C and C++, but if we uncomment the line above printf, it only compiles in C++. That's because in C++ the (=) operator also returns a lvalue.
+
+In C++ version, output is the variable itself from which we could extract its reference and do anything with it. In C, we only get the value, and assigning to it would make no sense.
+
+== Fact 5
+=== Comma Operator
+
+Look at the following code snippet:
+
+[comma-operator.c, c]
+----
+#include<stdio.h>
+
+int main() {
+  int a;
+  int b;
+  int c = (a = 2, b = 3, a+b);
+
+  printf("Value (a) = %d\n", a);
+  printf("Value (b) = %d\n", b);
+  printf("Value (c) = %d\n", c);
+
+  return 0;
+}
+----
+
+In C, we also have a comma operator is left associate operator that returns the value to the right. This means, the left side expression is evaluated first (unlike the (=) operator where right side is evaluated first), so assignment is performed first. Since leftmost value is returned, we would expect to get an output of 5. Which is what we get:
+
+Output:
+----
+Value (a) = 2
+Value (b) = 3
+Value (c) = 5
+----
 
