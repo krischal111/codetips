@@ -97,6 +97,13 @@ int main() {
 }
 ----
 
+Output:
+----
+Size of zero_bit_type: 0 bytes
+----
+
+NOTE: Support for empty structure is compiler dependent. {cpp} supports it though. {cpp} empty structs are guaranteed to take at least one byte in memory. Thus many C empty structs also happen to take 1 byte in memory in most compilers. Interestingly, the of empty struct also take 1 byte in memory.
+
 Since the struct has no field, we don't have to assign any value while instantiating it. Believe it or not, this is the unit type in C because it has only one possible value.
 
 If it feels hard to wrap around whether it has only one possible values or zero possible values, consider following demonstration.
@@ -187,10 +194,10 @@ Value (c) = 11
 
 Assignment operator (=), like any other operator returns a value, in this case the value that's being assigned is the return value.
 
-==== C/C++ difference
-The above program works both in C and C++, but if we uncomment the line above printf, it only compiles in C++. That's because in C++ the (=) operator also returns a lvalue.
+==== C/{cpp} difference
+The above program works both in C and {cpp} but if we uncomment the line above printf, it only compiles in {cpp}. That's because in {cpp} the (=) operator also returns a lvalue.
 
-In C++ version, output is the variable itself from which we could extract its reference and do anything with it. In C, we only get the value, and assigning to it would make no sense.
+In {cpp} version, output is the variable itself from which we could extract its reference and do anything with it. In C, we only get the value, and assigning to it would make no sense.
 
 == Fact 5
 === Comma Operator
