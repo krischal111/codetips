@@ -102,7 +102,7 @@ Output:
 Size of zero_bit_type: 0 bytes
 ----
 
-NOTE: Support for empty structure is compiler dependent. {cpp} supports it though. {cpp} empty structs are guaranteed to take at least one byte in memory. Thus many C empty structs also happen to take 1 byte in memory in most compilers. Interestingly, the of empty struct also take 1 byte in memory.
+NOTE: Support for empty structs in C is compiler dependent. However, in {cpp} they're supported and are guaranteed to take at least 1 byte in memory. Thus, empty structs (and their array) in C also happen to take 1 byte of memory per instantiation. However, if you apply the sizeof() operator, you will still get 0 bytes as the answer. Likewise, pointers to empty structs remain unchanged under pointer arithmetic.
 
 Since the struct has no field, we don't have to assign any value while instantiating it. Believe it or not, this is the unit type in C because it has only one possible value.
 
