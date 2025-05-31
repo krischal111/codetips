@@ -1,7 +1,0 @@
-= codetips
-
-// * link:./Interesting-facts-about-C/README.adoc[Interesting facts about C]
-
-* link:./Interesting-facts-about-C/README.adoc.html[Interesting facts about C]
-
-* link:./c-dynamic-dispatch/README.adoc.html[Dynamic Dispatch in C]
