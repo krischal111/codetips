@@ -1,0 +1,408 @@
+= Different ways to perform dynamic dispatch in C
+:toc:
+
+== What is dynamic dispatch?
+
+In the phrase "dynamic dispatch", "dynamic" refers to something that happens at runtime (as opposed to compile time), and "dispatch" refers of selection of which function to execute.
+
+So, Dynamic Dispatch is the mechanism by which program dynamically selects which function to execute based on something only knowable at runtime. In most cases, this is the type of object/(or struct) that is being operated on.
+
+== What is the application of dynamic dispatch?
+
+Let's take an example. You are building a game where there are a lot of animals. All animals can talk and eat. But all animals talk and eat in different ways.
+
+So you represent each animal as a separate struct (`struct Cat {...}`, `struct dog {...}`, etc.), and you want your code to be agnostic (=does not matter) to which animal it is.
+
+== Actually doing the dynamic dispatch
+
+So, how do you implement this in C? How do you make your code agnostic to the type of animal it is?
+
+Well, there are a few ways to achieve dynamic dispatch in C. The most common ways are:
+
+=== 1. Tagged Unions
+==== a. Naïve way
+
+Suppose we have following structs for two animals:
+
+[source,c]
+----
+struct Cat {
+    const char * name;
+    int purr;
+};
+struct Dog {
+    int wag;
+    const char * name;
+};
+----
+
+And functions for each of the structs:
+[source,c]
+----
+#include <stdio.h>
+
+// Cat specific functions
+void cat_talk(struct Cat *cat) {
+    if (cat->purr > 0) cat->purr--;
+    printf("%s meows (Purr left: %d)\n", cat->name, cat->purr);
+}
+void cat_eat(struct Cat *cat) {
+    cat->purr++;
+    printf("%s eats fish (+1 purr, now %d)\n", cat->name, cat->purr);
+}
+
+// Dog specific functions
+void dog_talk(struct Dog *dog) {
+    if (dog->wag > 0) dog->wag--;
+    printf("%s woofs (Wag left: %d)\n", dog->name, dog->wag);
+}
+void dog_eat(struct Dog *dog) {
+    dog->wag++;
+    printf("%s eats bone (+1 wag, now %d)\n", dog->name, dog->wag);
+}
+----
+
+We can create a tagged union to hold either a Cat or a Dog. In C, it can be done as follows:
+
+[source,c]
+----
+struct Animal {
+    union {
+        struct Cat cat;
+        struct Dog dog;
+    };
+    enum { CAT, DOG } type;
+};
+----
+
+Now, let's make two objects of type `Animal` using tagged union as:
+[source,c]
+----
+int main() {
+    struct Cat kitty = {"Kitty", 5};
+    struct Dog doggo = {3, "Doggo"};
+
+    struct Animal animals[2];
+    animals[0] = (struct Animal){.cat=kitty, CAT};
+    animals[1] = (struct Animal){.dog=doggo, DOG};
+    // declarations
+    // ... to be continued later
+}
+----
+
+Now, we see, we can store both `Cat` and `Dog` in the same array of `Animal`. But how do we call the correct function for each animal?
+
+Switches!
+
+We can perform a dynamic dispatch using a switch statement based on the type field in the `Animal` struct, as follows:
+
+[source,c]
+----
+void animal_talk(struct Animal *animal) {
+    switch (animal->type) {
+        case CAT:
+            cat_talk(& animal->animal.cat);
+            break;
+        case DOG:
+            dog_talk(& animal->animal.dog);
+            break;
+    }
+}
+void animal_eat(struct Animal *animal) {
+    switch (animal->type) {
+        case CAT:
+            cat_eat(& animal->animal.cat);
+            break;
+        case DOG:
+            dog_eat(& animal->animal.dog);
+            break;
+    }
+}
+----
+
+Yayy, now we can call `animal_talk` and `animal_eat` on any `Animal` object, and it will call the correct function based on the type of animal.
+
+[source,c]
+----
+int main() {
+    // ... continued from previous code
+    // usage
+    for (int i = 0; i < 2; i++) {
+        animal_talk(&animals[i]);
+    }
+    print("\n");
+    for (int i = 0; i < 2; i++) {
+        animal_eat(&animals[i]);
+    }
+}
+----
+
+Advantages:
+
+. This approach is simple compared to other upcoming methods.
+
+Disadvantages:
+
+. The number of animal types is fixed, making it closed for extension.
+. If support for additional animal is needed, you have to modify the `Animal` struct, the switch statements.
+
+TIP: Can you find yet another disadvantage in this specific implementation? It's got to do with memory usage.
+
+++++
+<details>
+<summary>Click to reveal answer</summary>
+++++
+If you see the implementation for tagged union, it's *storing the whole cat or dog struct*. Since a union's size is the size of largest member, if one of the animal is especially large (in memory), it will make the whole union large, even if most of your animals are small.
+++++
+</details>
+++++
+
+==== b. Improve using pointers.
+
+This one is pretty straightforward. Instead of storing the whole `Cat` or `Dog` struct in the union, we can store pointers to them. This way, we can save memory and also make it easier to add new animal types.
+
+Following changes are needed to be made:
+
+Redefinition of `Animal` struct to use pointers:
+[source,c]
+----
+struct Animal {
+    union {
+        struct Cat *cat;
+        struct Dog *dog;
+    };
+    enum { CAT, DOG } type;
+};
+----
+
+Change the `animal_talk` and `animal_eat` function to remove reference since we are already using pointers:
+[source,c]
+----
+void animal_talk(struct Animal *animal) {
+    switch (animal->type) {
+        case CAT:
+            cat_talk(animal->cat);
+            break;
+        case DOG:
+            dog_talk(animal->dog);
+            break;
+    }
+}
+void animal_eat(struct Animal *animal) {
+    switch (animal->type) {
+        case CAT:
+            cat_eat(animal->cat);
+            break;
+        case DOG:
+            dog_eat(animal->dog);
+            break;
+    }
+}
+----
+
+Create the `Animal` objects using pointers:
+[source,c]
+----
+int main() {
+    struct Cat kitty = {"Kitty", 5};
+    struct Dog doggo = {3, "Doggo"};
+
+    struct Animal animals[2];
+    animals[0] = (struct Animal){.cat=&kitty, CAT};
+    animals[1] = (struct Animal){.dog=&doggo, DOG};
+
+    // usage
+    for (int i = 0; i < 2; i++) {
+        animal_talk(&animals[i]);
+    }
+    printf("\n");
+    for (int i = 0; i < 2; i++) {
+        animal_eat(&animals[i]);
+    }
+}
+----
+
+Advantages:
+
+. Still simple.
+. Saves memory by storing pointers in union, thereby making all animal types the same size.
+
+Disadvantages:
+
+. Still the number of animal types is fixed, making it closed for extension.
+. If support for additional animal is needed, you still have to modify the Animal struct and the switch statements.
+. Manual memory management is required.
+
+TIP: What is the time complexity of the dynamic dispatch (considering we support n different animals types)?
+++++
+<details>
+<summary>Click to reveal answer</summary>
+++++
+The bottleneck here is the switch statement. If we had more animal types, the switch statement would have to check each case until it finds the correct one. So, the time complexity is O(n), where n is the number of animal types.
+
+However, under right conditions, many modern compilers can optimize them to bound checked jump tables reducing time complexity to O(1).
+++++
+</details>
+++++
+
+=== Ponder point
+
+Until now, we have been using a switch statement to perform the dynamic dispatch.
+
+Imagine if there were a virtual table that maps animal types to their respective function. In our implementation, switch statement has an implicit "vtable" (virtual table) in the sense that it selects the appropriate function based on the type of animal.
+
+But if we could make the vtable explicit, we could enable extension as well as make the dispatch faster. Let's see.
+
+=== 2. Virtual Tables (vtable)
+
+In previous implementations, we started with individual animals, and later added them all into the tagged union. This made it closed for more extension later on.
+
+However, in this approach, we start from the animal base class and vtable, and then extend it for more animal support.
+
+Define animal's vtable.
+
+[source,c]
+----
+struct AnimalVTable {
+    void (*talk)(void *animal);
+    void (*eat)(void *animal);
+};
+----
+
+Define the animal struct that uses the vtable. And define how the vtable is used to call the functions.
+
+[source,c]
+----
+struct Animal {
+    void * animal_pointer;
+    struct AnimalVTable *vtable;
+};
+
+void animal_talk(struct Animal *animal) {
+    animal->vtable->talk(animal->animal_pointer);
+}
+void animal_eat(struct Animal *animal) {
+    animal->vtable->eat(animal->animal_pointer);
+}
+----
+
+++++
+<details>
+<summary>Create structs and define the functions for cats and dogs.</summary>
+++++
+[source,c]
+----
+#include <stdio.h>
+
+struct Cat {
+    const char * name;
+    int purr;
+};
+void cat_talk(struct Cat *cat) {
+    if (cat->purr > 0) cat->purr--;
+    printf("%s meows (Purr left: %d)\n", cat->name, cat->purr);
+}
+void cat_eat(struct Cat *cat) {
+    cat->purr++;
+    printf("%s eats fish (+1 purr, now %d)\n", cat->name, cat->purr);
+}
+
+struct Dog {
+    int wag;
+    const char * name;
+};
+void dog_talk(struct Dog *dog) {
+    if (dog->wag > 0) dog->wag--;
+    printf("%s woofs (Wag left: %d)\n", dog->name, dog->wag);
+}
+void dog_eat(struct Dog *dog) {
+    dog->wag++;
+    printf("%s eats bone (+1 wag, now %d)\n", dog->name, dog->wag);
+}
+----
+++++
+</details>
+++++
+
+Now, we can define the overridden functions for each animal type, and create their vtables.
+[source,c]
+----
+void cat_talk_override(void *animal) {
+    struct Cat *cat = (struct Cat *)animal;
+    cat_talk(cat);
+}
+void cat_eat_override(void *animal) {
+    struct Cat *cat = (struct Cat *)animal;
+    cat_eat(cat);
+}
+
+void dog_talk_override(void *animal) {
+    struct Dog *dog = (struct Dog *)animal;
+    dog_talk(dog);
+}
+void dog_eat_override(void *animal) {
+    struct Dog *dog = (struct Dog *)animal;
+    dog_eat(dog);
+}
+----
+
+Finally, we can create vtables for each animal type.
+
+[source,c]
+----
+struct AnimalVTable cat_vtable = {
+    .talk = cat_talk_override,
+    .eat = cat_eat_override
+};
+struct AnimalVTable dog_vtable = {
+    .talk = dog_talk_override,
+    .eat = dog_eat_override
+};
+----
+
+Now, we can create the `Animal` objects using the vtables.
+[source,c]
+----
+int main() {
+    struct Cat kitty = {"Kitty", 5};
+    struct Dog doggo = {3, "Doggo"};
+
+    struct Animal animals[2];
+    animals[0] = (struct Animal){.animal_pointer=&kitty, .vtable=&cat_vtable};
+    animals[1] = (struct Animal){.animal_pointer=&doggo, .vtable=&dog_vtable};
+
+    // usage
+    for (int i = 0; i < 2; i++) {
+        animal_talk(&animals[i]);
+    }
+    printf("\n");
+    for (int i = 0; i < 2; i++) {
+        animal_eat(&animals[i]);
+    }
+}
+----
+
+Advantages:
+
+. This approach is open for extension. You can add new animal types without modifying the existing code.
+. Memory efficient.
+. The dispatch is faster than the switch statement, as it directly calls the function from the vtable.
+
+Disadvantages:
+
+. More complex to implement than the previous approaches.
+
+=== 3. Function Pointers
+
+This is a simpler version of the vtable approach. Instead of using a struct for the vtable, we can use function pointers directly in the `Animal` struct.
+
+However there is no code to demonstrate this approach, as it is very similar to the vtable approach, but without the struct. You can define function pointers for `talk` and `eat` directly in the `Animal` struct, and call them directly.
+
+This approach is not as flexible as the vtable approach, as it does not allow for multiple functions with the same name, but it is simpler to implement.
+
+== Conclusion
+Dynamic dispatch is a powerful mechanism that allows you to write code that is agnostic to the type of object it is operating on. In C, there are several ways to achieve dynamic dispatch, each with its own advantages and disadvantages.
+The most common ways are tagged unions, virtual tables, function pointers. Each approach has its own trade-offs, and the best approach depends on your specific use case and requirements.
+
+== Further Reading
+- [Dynamic Dispatch in C](https://en.wikipedia.org/wiki/Dynamic_dispatch): Wikipedia article on dynamic dispatch.
