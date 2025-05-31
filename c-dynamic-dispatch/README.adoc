@@ -398,11 +398,12 @@ This is a simpler version of the vtable approach. Instead of using a struct for 
 
 However there is no code to demonstrate this approach, as it is very similar to the vtable approach, but without the struct. You can define function pointers for `talk` and `eat` directly in the `Animal` struct, and call them directly.
 
-This approach is not as flexible as the vtable approach, as it does not allow for multiple functions with the same name, but it is simpler to implement.
+This approach takes more memory because it requires function pointer for each function. Similarly, this also requires more work on instantiation, as you have to set the function pointers for each animal type.
+
 
 == Conclusion
 Dynamic dispatch is a powerful mechanism that allows you to write code that is agnostic to the type of object it is operating on. In C, there are several ways to achieve dynamic dispatch, each with its own advantages and disadvantages.
 The most common ways are tagged unions, virtual tables, function pointers. Each approach has its own trade-offs, and the best approach depends on your specific use case and requirements.
 
 == Further Reading
-- [Dynamic Dispatch in C](https://en.wikipedia.org/wiki/Dynamic_dispatch): Wikipedia article on dynamic dispatch.
+- link:https://en.wikipedia.org/wiki/Dynamic_dispatch[Dynamic Dispatch] : Wikipedia article on dynamic Dispatch.
