@@ -402,8 +402,5 @@ This approach takes more memory because it requires function pointer for each fu
 
 
 == Conclusion
-Dynamic dispatch is a powerful mechanism that allows you to write code that is agnostic to the type of object it is operating on. In C, there are several ways to achieve dynamic dispatch, each with its own advantages and disadvantages.
-The most common ways are tagged unions, virtual tables, function pointers. Each approach has its own trade-offs, and the best approach depends on your specific use case and requirements.
 
-== Further Reading
-- link:https://en.wikipedia.org/wiki/Dynamic_dispatch[Dynamic Dispatch] : Wikipedia article on dynamic Dispatch.
+Thus we discussed how we could go about implementing dynamic dispatch in C. Among all three approaches, I recommend the vtable approach as it saves most memory, and works on O(1) time complexity, and you extension to support new types is also easy.
