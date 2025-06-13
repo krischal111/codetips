@@ -403,4 +403,4 @@ This approach takes more memory because it requires function pointer for each fu
 
 == Conclusion
 
-Thus we discussed how we could go about implementing dynamic dispatch in C. Among all three approaches, I recommend the vtable approach as it saves most memory, and works on O(1) time complexity, and you extension to support new types is also easy.
+Thus we discussed how we could go about implementing dynamic dispatch in C. Among all three approaches, I recommend the vtable approach as it saves most memory, and works on O(1) time complexity, and extension to support new types is also easy.
